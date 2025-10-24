@@ -4,6 +4,14 @@ import 'package:injectable/injectable.dart';
 class SimpleFactory {}
 
 @injectable
+class FactoryWithoutAnnotation {
+  FactoryWithoutAnnotation._internal();
+  // not annotated with @factoryMethod in order to take fist available
+  FactoryWithoutAnnotation.valid() : this._internal();
+  FactoryWithoutAnnotation.second() : this._internal();
+}
+
+@injectable
 class FactoryWithDeps {
   const FactoryWithDeps(SimpleFactory simpleFactory);
 }
@@ -43,7 +51,25 @@ class FactoryWithAnnotationScope {
 @injectable
 class FactoryWithNullableFactoryParams {
   const FactoryWithNullableFactoryParams(
-      @factoryParam SimpleFactory? simpleFactory);
+    @factoryParam SimpleFactory? simpleFactory,
+  );
+}
+
+@injectable
+class FactoryWithFactoryStaticConstructor {
+  FactoryWithFactoryStaticConstructor._();
+
+  @factoryMethod
+  factory FactoryWithFactoryStaticConstructor.namedFactory() =>
+      FactoryWithFactoryStaticConstructor._();
+}
+
+@injectable
+class FactoryWithNamedConstructor {
+  FactoryWithNamedConstructor._();
+
+  @factoryMethod
+  FactoryWithNamedConstructor.namedFactory() : this._();
 }
 
 @injectable
@@ -52,7 +78,8 @@ class AsyncFactoryWithNullableDeps {
 
   @factoryMethod
   static Future<AsyncFactoryWithNullableDeps> create(
-      @factoryParam SimpleFactory? simpleFactory) async {
+    @factoryParam SimpleFactory? simpleFactory,
+  ) async {
     return AsyncFactoryWithNullableDeps(simpleFactory);
   }
 }
@@ -62,7 +89,8 @@ class AsyncFactoryWithNonNullableDeps {
 
   @factoryMethod
   static Future<AsyncFactoryWithNonNullableDeps> create(
-      @factoryParam SimpleFactory simpleFactory) async {
+    @factoryParam SimpleFactory simpleFactory,
+  ) async {
     return AsyncFactoryWithNonNullableDeps(simpleFactory);
   }
 }
