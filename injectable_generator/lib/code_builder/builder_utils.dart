@@ -123,17 +123,18 @@ void _sortByDependents(
         if (deps.every(sorted.contains)) {
           return true;
         }
-      } if (dep.environments.isEmpty) {
+      }
+      if (dep.environments.isEmpty) {
         final List<DependencyConfig> deps = unSorted
-            .where((d) =>
-        d.type == iDep.type && d.instanceName == iDep.instanceName)
+            .where(
+              (d) => d.type == iDep.type && d.instanceName == iDep.instanceName,
+            )
             .toList(growable: false);
 
         if (deps.every(sorted.contains)) {
           return true;
         }
-      }
-      else if (lookupDependencyWithNoEnvOrHasAny(
+      } else if (lookupDependencyWithNoEnvOrHasAny(
             iDep,
             sorted,
             dep.environments,

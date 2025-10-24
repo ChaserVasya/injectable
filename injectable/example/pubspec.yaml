@@ -6,8 +6,8 @@ environment:
 
 dependencies:
   get_it:  ">=7.0.0 <9.0.0"
-  injectable: ^2.5.0
-#    path: ../../injectable
+  injectable:
+    path: ../../injectable
 
 
 dev_dependencies:
