@@ -11,9 +11,7 @@ import 'package:meta/meta.dart';
 class DependencyList with IterableMixin<DependencyConfig> {
   final List<DependencyConfig> _dependencies;
 
-  DependencyList({
-    required List<DependencyConfig> dependencies,
-  }) : _dependencies = sortDependencies(dependencies);
+  DependencyList({required List<DependencyConfig> dependencies}) : _dependencies = sortDependencies(dependencies);
 
   bool hasAsyncDependency(DependencyConfig dep) {
     _ensureAsyncDepsMapInitialized();
@@ -44,8 +42,7 @@ class DependencyList with IterableMixin<DependencyConfig> {
 
       final did = dep.id;
       hasAsyncDepsMap[did] = hasAsyncDeps;
-      isAsyncOrHasAsyncDepsMap[did] =
-          (dep.isAsync && !dep.preResolve) || hasAsyncDeps;
+      isAsyncOrHasAsyncDepsMap[did] = (dep.isAsync && !dep.preResolve) || hasAsyncDeps;
     }
 
     _hasAsyncDeps = hasAsyncDepsMap;
@@ -60,10 +57,7 @@ class _DependencyId {
   final ImportableType type;
   final String? instanceName;
 
-  const _DependencyId({
-    required this.type,
-    required this.instanceName,
-  });
+  const _DependencyId({required this.type, required this.instanceName});
 
   @override
   String toString() {
@@ -134,31 +128,29 @@ void _sortByDependents(
         if (deps.every(sorted.contains)) {
           return true;
         }
-      } else if (lookupDependencyWithNoEnvOrHasAny(
-            iDep,
-            sorted,
-            dep.environments,
-          ) !=
-          null) {
-        // if dep is already in sorted return true
-        return true;
+      } else {
+        int foundForEnvs = 0;
+        for (final env in dep.environments) {
+          if (lookupDependencyWithNoEnvOrHasAny(iDep, sorted, [env]) == null) {
+            return false;
+          } else {
+            foundForEnvs++;
+          }
+        }
+        // if all deps for all environments are found we can proceed
+        if (foundForEnvs == dep.environments.length) {
+          return true;
+        }
       }
 
       // if dep is in unSorted we skip it in this iteration, if not we include it
-      return lookupDependencyWithNoEnvOrHasAny(
-            iDep,
-            unSorted,
-            dep.environments,
-          ) ==
-          null;
+      return lookupDependencyWithNoEnvOrHasAny(iDep, unSorted, dep.environments) == null;
     })) {
       sorted.add(dep);
     }
   }
   if (unSorted.isNotEmpty) {
-    var difference = unSorted
-        .where((element) => !sorted.contains(element))
-        .toList();
+    var difference = unSorted.where((element) => !sorted.contains(element)).toList();
 
     _sortByDependents(difference, sorted);
   }
@@ -182,11 +174,7 @@ DependencyConfig? lookupDependencyWithNoEnvOrHasAny(
     (d) =>
         d.type == iDep.type &&
         d.instanceName == iDep.instanceName &&
-        (d.environments.isEmpty ||
-            envs.isEmpty ||
-            d.environments.any(
-              (e) => envs.contains(e),
-            )),
+        (d.environments.isEmpty || envs.isEmpty || d.environments.any(envs.contains)),
   );
 }
 
@@ -194,9 +182,7 @@ Set<DependencyConfig> lookupPossibleDeps(
   InjectedDependency iDep,
   Iterable<DependencyConfig> allDeps,
 ) {
-  return allDeps
-      .where((d) => d.type == iDep.type && d.instanceName == iDep.instanceName)
-      .toSet();
+  return allDeps.where((d) => d.type == iDep.type && d.instanceName == iDep.instanceName).toSet();
 }
 
 bool hasPreResolvedDependencies(Iterable<DependencyConfig> deps) {

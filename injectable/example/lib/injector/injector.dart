@@ -5,14 +5,7 @@ import 'injector.config.dart';
 const platformMobile = Environment('platformMobile');
 const platformWeb = Environment('platformWeb');
 
-@InjectableInit(preferRelativeImports: true)
-configInjector(
-  GetIt getIt, {
-  String? env,
-  EnvironmentFilter? environmentFilter,
-}) {
-  return getIt.init(
-    environmentFilter: environmentFilter,
-    environment: env,
-  );
+@InjectableInit(generateAccessors: true)
+Future<GetIt> configInjector(GetIt getIt, {String? env, EnvironmentFilter? environmentFilter}) {
+  return getIt.init(environmentFilter: environmentFilter, environment: env);
 }

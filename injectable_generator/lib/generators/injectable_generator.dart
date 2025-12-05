@@ -38,6 +38,8 @@ class InjectableGenerator implements Generator {
   @override
   FutureOr<String?> generate(LibraryReader library, BuildStep buildStep) async {
     final allDepsInStep = <DependencyConfig>[];
+    final libs = await buildStep.resolver.libraries.toList();
+    final resolver = getResolver(libs);
     for (var clazz in library.classes) {
       if (_moduleChecker.hasAnnotationOfExact(clazz)) {
         throwIf(
@@ -52,17 +54,13 @@ class InjectableGenerator implements Generator {
         for (var element in executables) {
           if (element.isPrivate) continue;
           allDepsInStep.add(
-            DependencyResolver(
-              getResolver(await buildStep.resolver.libraries.toList()),
-            ).resolveModuleMember(clazz, element),
+            DependencyResolver(resolver).resolveModuleMember(clazz, element),
           );
         }
       } else if (_hasInjectable(clazz) ||
           (_autoRegister && _hasConventionalMatch(clazz))) {
         allDepsInStep.add(
-          DependencyResolver(
-            getResolver(await buildStep.resolver.libraries.toList()),
-          ).resolve(clazz),
+          DependencyResolver(resolver).resolve(clazz),
         );
       }
     }

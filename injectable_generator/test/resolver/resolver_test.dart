@@ -53,10 +53,7 @@ void main() async {
     test('Simple Factory no dependencies', () {
       var simpleFactoryType = resolvedInput!.library.findType('SimpleFactory')!;
 
-      final type = ImportableType(
-        name: 'SimpleFactory',
-        import: 'source.dart',
-      );
+      final type = ImportableType(name: 'SimpleFactory', import: 'source.dart');
       expect(
         DependencyConfig(
           type: type,
@@ -90,6 +87,7 @@ void main() async {
             InjectedDependency(
               type: dependencyType,
               paramName: 'simpleFactory',
+              isRequired: true,
             ),
           ],
         ),
@@ -116,10 +114,7 @@ void main() async {
           typeImpl: type,
           injectableType: InjectableType.factory,
           dependencies: [
-            InjectedDependency(
-              type: dependencyType,
-              paramName: 'simpleFactory',
-            ),
+            InjectedDependency(type: dependencyType, paramName: 'simpleFactory', isRequired: true),
           ],
         ),
         dependencyResolver!.resolve(factoryWithDeps),
@@ -150,6 +145,7 @@ void main() async {
               type: dependencyType,
               paramName: 'simpleFactory',
               isFactoryParam: true,
+              isRequired: true,
             ),
           ],
         ),
@@ -180,6 +176,7 @@ void main() async {
               type: dependencyType,
               paramName: 'simpleFactory',
               isPositional: true,
+              isRequired: true,
             ),
           ],
         ),
@@ -211,6 +208,7 @@ void main() async {
               paramName: 'simpleFactory',
               isFactoryParam: true,
               isPositional: true,
+              isRequired: true,
             ),
           ],
         ),
@@ -237,6 +235,7 @@ void main() async {
               paramName: 'record',
               isFactoryParam: true,
               isPositional: true,
+              isRequired: true,
             ),
           ],
         ),
@@ -278,6 +277,7 @@ void main() async {
               paramName: 'record',
               isFactoryParam: true,
               isPositional: true,
+              isRequired: true,
             ),
           ],
         ),
@@ -307,6 +307,7 @@ void main() async {
               paramName: 'record',
               isFactoryParam: true,
               isPositional: true,
+              isRequired: true,
             ),
           ],
         ),
@@ -333,19 +334,14 @@ void main() async {
                 name: '',
                 import: 'source.dart',
                 typeArguments: [
-                  ImportableType(
-                    name: 'SimpleFactory',
-                    import: 'source.dart',
-                  ),
-                  ImportableType(
-                    name: 'int',
-                    import: 'source.dart',
-                  ),
+                  ImportableType(name: 'SimpleFactory', import: 'source.dart'),
+                  ImportableType(name: 'int', import: 'source.dart'),
                 ],
               ),
               paramName: 'record',
               isFactoryParam: true,
               isPositional: true,
+              isRequired: true,
             ),
           ],
         ),
@@ -358,10 +354,7 @@ void main() async {
         'FactoryAsAbstract',
       )!;
 
-      final type = ImportableType(
-        name: 'IFactory',
-        import: 'source.dart',
-      );
+      final type = ImportableType(name: 'IFactory', import: 'source.dart');
 
       final typeImpl = ImportableType(
         name: 'FactoryAsAbstract',
@@ -444,6 +437,7 @@ void main() async {
               type: dependencyType,
               paramName: 'simpleFactory',
               isFactoryParam: true,
+              isRequired: true,
             ),
           ],
           isAsync: true,
@@ -549,10 +543,7 @@ void main() async {
 
     test('Const injectable with no deps can generate const instances', () {
       var simpleFactoryType = resolvedInput!.library.findType('ConstService')!;
-      final type = ImportableType(
-        name: 'ConstService',
-        import: 'source.dart',
-      );
+      final type = ImportableType(name: 'ConstService', import: 'source.dart');
       expect(
         DependencyConfig(
           type: type,
@@ -583,6 +574,7 @@ void main() async {
                 import: 'source.dart',
               ),
               paramName: 'simpleFactory',
+              isRequired: true,
             ),
           ],
           injectableType: InjectableType.factory,

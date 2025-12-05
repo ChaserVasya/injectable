@@ -27,37 +27,26 @@ class InjectableConfigGenerator extends GeneratorForAnnotation<InjectableInit> {
     ConstantReader annotation,
     BuildStep buildStep,
   ) async {
-    final generateForDir = annotation
-        .read('generateForDir')
-        .listValue
-        .map((e) => e.toStringValue());
+    final generateForDir = annotation.read('generateForDir').listValue.map((e) => e.toStringValue());
 
     final usesNullSafety = annotation.read('usesNullSafety').boolValue;
     final isMicroPackage = annotation.read('_isMicroPackage').boolValue;
-    final usesConstructorCallback = annotation
-        .read('usesConstructorCallback')
-        .boolValue;
-    final throwOnMissingDependencies = annotation
-        .read('throwOnMissingDependencies')
-        .boolValue;
+    final usesConstructorCallback = annotation.read('usesConstructorCallback').boolValue;
+    final throwOnMissingDependencies = annotation.read('throwOnMissingDependencies').boolValue;
     final targetFile = element.firstFragment.libraryFragment?.source.uri;
-    final preferRelativeImports = annotation
-        .read("preferRelativeImports")
-        .boolValue;
+    final preferRelativeImports = annotation.read("preferRelativeImports").boolValue;
     final generateForEnvironments = annotation
         .read('generateForEnvironments')
         .setValue
         .map((e) => e.getField('name')?.toStringValue());
 
-    final includeMicroPackages = annotation
-        .read("includeMicroPackages")
-        .boolValue;
+    final includeMicroPackages = annotation.read("includeMicroPackages").boolValue;
+
+    final generateAccessors = annotation.read("generateAccessors").boolValue;
 
     final rootDir = annotation.peek('rootDir')?.stringValue;
 
-    final dirPattern = generateForDir.length > 1
-        ? '{${generateForDir.join(',')}}'
-        : '${generateForDir.first}';
+    final dirPattern = generateForDir.length > 1 ? '{${generateForDir.join(',')}}' : '${generateForDir.first}';
 
     final injectableConfigFiles = Glob("$dirPattern/**.injectable.json");
 
@@ -82,9 +71,7 @@ class InjectableConfigGenerator extends GeneratorForAnnotation<InjectableInit> {
     final ignoredTypes = annotation
         .read('ignoreUnregisteredTypes')
         .listValue
-        .map(
-          (e) => typeResolver.resolveType(e.toTypeValue()!),
-        );
+        .map((e) => typeResolver.resolveType(e.toTypeValue()!));
 
     final microPackageModulesBefore = _getMicroPackageModules(
       annotation.peek('externalPackageModulesBefore'),
@@ -119,10 +106,7 @@ class InjectableConfigGenerator extends GeneratorForAnnotation<InjectableInit> {
           final segments = commentAnnotation.split(';');
           if (segments.length == 3) {
             final externalModule = ExternalModuleConfig(
-              ImportableType(
-                name: segments[1],
-                import: segments[2],
-              ),
+              ImportableType(name: segments[1], import: segments[2]),
             );
             if (!microPackagesModules.any(
               (e) => externalModule.module == e.module,
@@ -183,12 +167,11 @@ class InjectableConfigGenerator extends GeneratorForAnnotation<InjectableInit> {
               .toList();
     final generator = LibraryGenerator(
       dependencies: List.of(filteredDeps),
+      generateAccessors: generateAccessors,
       targetFile: preferRelativeImports ? targetFile : null,
       initializerName: initializerName,
       asExtension: asExtension,
-      microPackageName: isMicroPackage
-          ? buildStep.inputId.package.pascalCase
-          : null,
+      microPackageName: isMicroPackage ? buildStep.inputId.package.pascalCase : null,
       microPackagesModulesBefore: microPackageModulesBefore,
       microPackagesModulesAfter: microPackageModulesAfter,
       usesConstructorCallback: usesConstructorCallback,
@@ -223,25 +206,23 @@ class InjectableConfigGenerator extends GeneratorForAnnotation<InjectableInit> {
     ConstantReader? constList,
     ImportableTypeResolverImpl typeResolver,
   ) {
-    return constList?.listValue.map(
-          (e) {
-            final reader = ConstantReader(e);
-            final typeValue = reader.read('module').typeValue;
-            final scope = reader.peek('scope')?.stringValue;
-            throwIf(
-              typeValue.element is! ClassElement ||
-                  !TypeChecker.typeNamed(
-                    MicroPackageModule,
-                    inPackage: 'injectable',
-                  ).isSuperOf(typeValue.element!),
-              'ExternalPackageModule must be a class that extends MicroPackageModule',
-            );
-            return ExternalModuleConfig(
-              typeResolver.resolveType(typeValue),
-              scope,
-            );
-          },
-        ).toSet() ??
+    return constList?.listValue.map((e) {
+          final reader = ConstantReader(e);
+          final typeValue = reader.read('module').typeValue;
+          final scope = reader.peek('scope')?.stringValue;
+          throwIf(
+            typeValue.element is! ClassElement ||
+                !TypeChecker.typeNamed(
+                  MicroPackageModule,
+                  inPackage: 'injectable',
+                ).isSuperOf(typeValue.element!),
+            'ExternalPackageModule must be a class that extends MicroPackageModule',
+          );
+          return ExternalModuleConfig(
+            typeResolver.resolveType(typeValue),
+            scope,
+          );
+        }).toSet() ??
         <ExternalModuleConfig>{};
   }
 
@@ -249,20 +230,18 @@ class InjectableConfigGenerator extends GeneratorForAnnotation<InjectableInit> {
     ConstantReader? constList,
     ImportableTypeResolverImpl typeResolver,
   ) {
-    return constList?.listValue.map(
-          (e) {
-            final typeValue = e.toTypeValue()!;
-            throwIf(
-              typeValue.element is! ClassElement ||
-                  !TypeChecker.typeNamed(
-                    MicroPackageModule,
-                    inPackage: 'injectable',
-                  ).isSuperOf(typeValue.element!),
-              'ExternalPackageModule must be a class that extends MicroPackageModule',
-            );
-            return ExternalModuleConfig(typeResolver.resolveType(typeValue));
-          },
-        ).toSet() ??
+    return constList?.listValue.map((e) {
+          final typeValue = e.toTypeValue()!;
+          throwIf(
+            typeValue.element is! ClassElement ||
+                !TypeChecker.typeNamed(
+                  MicroPackageModule,
+                  inPackage: 'injectable',
+                ).isSuperOf(typeValue.element!),
+            'ExternalPackageModule must be a class that extends MicroPackageModule',
+          );
+          return ExternalModuleConfig(typeResolver.resolveType(typeValue));
+        }).toSet() ??
         <ExternalModuleConfig>{};
   }
 
@@ -290,20 +269,17 @@ class InjectableConfigGenerator extends GeneratorForAnnotation<InjectableInit> {
 
         if (possibleDeps.isEmpty) {
           messages.add(
-            "[${dep.typeImpl}] depends on unregistered type [${iDep.type}] ${iDep.type.import == null ? '' : 'from ${iDep.type.import}'}",
+            "[${dep.typeImpl}] depends on unregistered type [${iDep.type}] ${iDep.instanceName == null ? '' : '@Named(${iDep.instanceName})'}, ${iDep.type.import == null ? '' : 'from ${iDep.type.import}'}",
           );
         } else {
-          final availableEnvs = possibleDeps
-              .map((e) => e.environments)
-              .reduce((a, b) => a + b)
-              .toSet();
+          final availableEnvs = possibleDeps.map((e) => e.environments).reduce((a, b) => a + b).toSet();
           if (availableEnvs.isNotEmpty) {
             final missingEnvs = dep.environments.toSet().difference(
               availableEnvs,
             );
             if (missingEnvs.isNotEmpty) {
               messages.add(
-                '[${dep.typeImpl}] ${dep.environments.toSet()} depends on Type [${iDep.type}] ${iDep.type.import == null ? '' : 'from ${iDep.type.import}'} \n which is not available under environment keys $missingEnvs',
+                '[${dep.typeImpl}] ${dep.environments.toSet()} depends on Type [${iDep.type}]  ${iDep.type.import == null ? '' : 'from ${iDep.type.import}'} \n which is not available under environment keys $missingEnvs',
               );
             }
           }
@@ -327,10 +303,7 @@ class InjectableConfigGenerator extends GeneratorForAnnotation<InjectableInit> {
     final validatedDeps = <DependencyConfig>[];
     for (var dep in deps) {
       var registered = validatedDeps.where(
-        (elm) =>
-            elm.type == dep.type &&
-            elm.instanceName == dep.instanceName &&
-            elm.scope == dep.scope,
+        (elm) => elm.type == dep.type && elm.instanceName == dep.instanceName && elm.scope == dep.scope,
       );
 
       if (registered.isEmpty) {
@@ -377,7 +350,5 @@ class _HashedAllocator implements Allocator {
   int _hashedUrl() => _url.hashCode / 1000000 ~/ 1;
 
   @override
-  Iterable<Directive> get imports => _imports.keys.map(
-    (u) => Directive.import(u, as: '_i${_imports[u]}'),
-  );
+  Iterable<Directive> get imports => _imports.keys.map((u) => Directive.import(u, as: '_i${_imports[u]}'));
 }
