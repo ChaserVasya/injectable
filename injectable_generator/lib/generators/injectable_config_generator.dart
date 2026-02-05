@@ -15,10 +15,9 @@ import 'package:injectable_generator/models/dependency_config.dart';
 import 'package:injectable_generator/models/external_module_config.dart';
 import 'package:injectable_generator/models/importable_type.dart';
 import 'package:injectable_generator/resolvers/importable_type_resolver.dart';
+import 'package:injectable_generator/utils.dart';
 import 'package:recase/recase.dart';
 import 'package:source_gen/source_gen.dart';
-
-import 'package:injectable_generator/utils.dart';
 
 class InjectableConfigGenerator extends GeneratorForAnnotation<InjectableInit> {
   @override
@@ -157,6 +156,7 @@ class InjectableConfigGenerator extends GeneratorForAnnotation<InjectableInit> {
       ignoreTypesInPackages,
       targetFile,
       throwOnMissingDependencies,
+      generateForEnvironments,
     );
     _validateDuplicateDependencies(deps);
 
@@ -272,6 +272,7 @@ class InjectableConfigGenerator extends GeneratorForAnnotation<InjectableInit> {
     Iterable<String> ignoredTypesInPackages,
     Uri? targetFile,
     bool throwOnMissingDependencies,
+    Iterable<String?> generateForEnvironments,
   ) {
     final messages = [];
     for (final dep in deps) {
@@ -298,13 +299,21 @@ class InjectableConfigGenerator extends GeneratorForAnnotation<InjectableInit> {
               .reduce((a, b) => a + b)
               .toSet();
           if (availableEnvs.isNotEmpty) {
-            final missingEnvs = dep.environments.toSet().difference(
-              availableEnvs,
-            );
-            if (missingEnvs.isNotEmpty) {
+            final targetEnvs = dep.environments.isEmpty
+                ? generateForEnvironments.whereType<String>().toSet()
+                : dep.environments.toSet();
+
+            if (targetEnvs.isEmpty) {
               messages.add(
-                '[${dep.typeImpl}] ${dep.environments.toSet()} depends on Type [${iDep.type}] ${iDep.type.import == null ? '' : 'from ${iDep.type.import}'} \n which is not available under environment keys $missingEnvs',
+                '[${dep.typeImpl}] has no environment restrictions but depends on Type [${iDep.type}] ${iDep.type.import == null ? '' : 'from ${iDep.type.import}'} \n which is only available under environment keys $availableEnvs',
               );
+            } else {
+              final missingEnvs = targetEnvs.difference(availableEnvs);
+              if (missingEnvs.isNotEmpty) {
+                messages.add(
+                  '[${dep.typeImpl}] ${dep.environments.isEmpty ? 'has no environment restrictions but' : dep.environments.toSet()} depends on Type [${iDep.type}] ${iDep.type.import == null ? '' : 'from ${iDep.type.import}'} \n which is not available under environment keys $missingEnvs',
+                );
+              }
             }
           }
         }
