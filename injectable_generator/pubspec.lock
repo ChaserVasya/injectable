@@ -245,8 +245,8 @@ packages:
     dependency: "direct main"
     description:
       path: injectable
-      ref: v2
-      resolved-ref: e3cf88f42746c57ce55ae45cacde802c02aedb3c
+      ref: v4
+      resolved-ref: c727f247da94841337297531ad5feb58bd86054d
       url: "https://github.com/ChaserVasya/injectable"
     source: git
     version: "2.5.2"
